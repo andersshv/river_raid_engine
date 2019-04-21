@@ -6,16 +6,15 @@ import javax.swing.SwingUtilities;
 import java.awt.event.WindowEvent;
 
 public class RiverRaid extends JFrame implements KeyListener, Runnable {
-  private String gameTitle = "River Raid 2";
-  private int ScreenWidth = 600;
-  private int ScreenHeight = 400;
-  private	Graphics canvas;
   private int ticks = 0;
   private boolean left = false;
   private boolean right = false;
   private boolean up = false;
   private boolean down = false;
   private boolean shoot = false;
+  private Map<Integer, BufferedImage> maps = new HashMap<>();
+  private Map<Integer, Map<Integer, List<Enemy>>> enemies = new HashMap<>();
+  private Player player;
   public static void main(String[] args){
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
@@ -24,19 +23,21 @@ public class RiverRaid extends JFrame implements KeyListener, Runnable {
 		});
 	}
   public RiverRaid() {
-		setTitle(gameTitle);
-		setSize(ScreenWidth, ScreenHeight);
+		setTitle(Config.gameTitle);
+      createMaps();
+      createPlayer();
+    }
+    setupModel();
+		setSize(getScreenWidth(), getScreenWidth() * Config.screenHeightFraction);
 		setLocationRelativeTo(null); // Center jframe on screen
 		setAlwaysOnTop(true); // Make the jframe stay on top of all other windows
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setVisible(true);
 		addKeyListener(this);
-		canvas = this.getGraphics();
 		new Thread(this).start();
 	}
 	public void run() {
-		long frames_pr_second = 30;
-		long time_pr_frame = 1000 / frames_pr_second; // In milliseconds
+		long time_pr_frame = 1000 / Config.fps; // In milliseconds
     long t1;
     long t2;
     long time_used;
@@ -44,8 +45,7 @@ public class RiverRaid extends JFrame implements KeyListener, Runnable {
     try {
   		while (true) {
   			t1 = System.nanoTime();
-  			updateModel();
-  			// drawModel();
+        doStuff();
   			t2 = System.nanoTime();
         time_used = (t1 - t2) / 1000000; // In milliseconds
   			time_remaining = time_pr_frame - time_used;
@@ -56,7 +56,7 @@ public class RiverRaid extends JFrame implements KeyListener, Runnable {
   			ticks += 1;
   		}
     } catch (Exception e) {
-      System.out.println("Error: " + e.toString());
+      System.out.println("Error in game loop: " + e.toString());
     }
 	}
   public void keyPressed(KeyEvent e) {
@@ -101,7 +101,45 @@ public class RiverRaid extends JFrame implements KeyListener, Runnable {
 	public void keyTyped(KeyEvent e) {
 		/* Not used */
 	}
-  updateModel() {
+  private void createPlayer() {
+    BufferedImage player = ImageIO.read(new File("img/player.png"));
+    int playerX,
+    int playerY, player
+    player = new Player()
+  }
+  private void createMaps() {
+    BufferedImage water = ImageIO.read(new File("img/water.png"));
+    BufferedImage land = ImageIO.read(new File("img/land.png"));
+    int tileWidth = water.getWidth;
+    for (int i = 0; i < Config.numberOfMaps; i++) {
+      Map<Integer, List<Enemy>> enemies_in_map = new HashMap<>();
+      BufferedImage map = ImageIO.read(new File("img/map" + i + ".png"));
+      int mapWidth = map.getWidth();
+      int mapHeight = map.getHeight();
+      BufferedImage tileMap = new BufferedImage(mapWidth*tileWidth, mapHeight*tileWidth, BufferedImage.TYPE_INT_RGB);
+      Graphics tileMapGraphics = (Graphics) tileMap.getGraphics();
+      for (int y = 0; y < mapHeight; y++) {
+        List<Enemy> enemies_at_y = new ArrayList<>();
+        for (int x = 0; x < mapWidth; x++) {
+          int mapPixel = map.getRGB(x, y);
+          if (mapPixel < -10) { // Color is black => add land tile to screen
+            tileMapGraphics.drawImage(land, x*tileWidth, y*tileWidth, null);
+            enemies_at_y.add(new Enemy(x*tileWidth, y*tileWidth, tileWidth, tileWidth));
+          } else { // Color is white => add water tile to screen
+            tileMapGraphics.drawImage(water, x*tileWidth, y*tileWidth, null);
+          }
+        }
+        enemies_in_map.put(y, enemies_at_y);
+      }
+      enemies.put(i, enemies_in_map);
+      maps.put(i, tileMap);
+    }
+  }
+  private int getScreenWidth() {
+    BufferedImage map1 = maps.get(1);
+    return map1.getWidth();
+  }
+  private void doStuff() {
 
   }
 }

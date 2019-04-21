@@ -1,0 +1,24 @@
+*** Landscape tiles ***
+water.png: a png image where width == height
+land.png: a png image where width == height
+
+*** Maps ***
+The maps are named like this: map1.png, map2.png, ...
+Each map is a black and white png image,
+where black pixels represent land tiles and white pixels represent water tiles.
+
+*** Screen Size ***
+screen_width = map_width x tile_width
+screen_height = screen_width * 3 / 4
+
+*** To get started: 1 ***
+Create the landscape images
+Define in the config file how many maps there are
+Create that many map images
+
+*** To get started: 2 ***
+Define width and height for the player in the config file
+Create the player sprite sheet
+The sprite sheet should have 3 sub-images:
+left, straight, right.
+Each sub-image should have the dimensions defined in the config file
